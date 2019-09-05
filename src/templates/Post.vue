@@ -142,7 +142,7 @@ query Post ($path: String) {
     content
     description
     timeToRead
-    cover
+    cover_image
     fullscreen
     author {
       id
