@@ -26,10 +26,10 @@
             </figure>
             <div class="px-4 sm:w-4/5 text-center sm:text-left">
               <h4 class="font-sans font-bold text-lg sm:text-xl mb-2 sm:mb-4">
-                <g-link :to="`${$page.post.author.path}/`" class="text-black hover:text-gray-600 capitalize border-b-2 border-transparent transition-color">{{ titleCase($page.post.author.title) }}</g-link>
+                <g-link :to="`${$page.post.author.path}/`" class="text-black hover:text-gray-600 border-b-2 border-transparent transition-color">{{ $page.post.author.title }}</g-link>
               </h4>
               <p class="leading-normal">
-                <g-link :to="`${$page.post.author.path}/`" class="text-blue-500 hover:text-blue-400 transition-color">See all posts by {{ titleCase($page.post.author.title) }} &rarr;</g-link>
+                <g-link :to="`${$page.post.author.path}/`" class="text-blue-500 hover:text-blue-400 transition-color">Zobacz wszystkie recenzje autorstwa {{ $page.post.author.title }} &rarr;</g-link>
               </p>
             </div>
           </div>
@@ -50,109 +50,160 @@ import SiteFooter from '@/components/Footer'
 import PostHeader from '~/components/PostHeader'
 
 export default {
-  components: {
-    Alert,
-    PostHeader,
-    SiteFooter,
-  },
-  metaInfo () {
-    return {
-      title: `${this.$page.post.title} ${this.$page.post.tag ? '- '+this.$page.post.tag.name : ''}`,
-      meta: [
-        {
-          key: 'description',
-          name: 'description',
-          content: this.description(this.$page.post)
+    components: {
+        Alert,
+        PostHeader,
+        SiteFooter,
+    },
+
+    metaInfo () {
+        return {
+            title: `${this.$page.post.title} ${this.$page.post.tag ? '- '+this.$page.post.tag.name : ''}`,
+            meta: [
+                {
+                    key: 'description',
+                    name: 'description',
+                    content: this.description(this.$page.post)
+                },
+
+                { property: "og:type", content: 'article' },
+                { property: "og:title", content: this.$page.post.title },
+                { property: "og:description", content: this.description(this.$page.post) },
+                { property: "og:url", content: this.postUrl },
+                { property: "article:published_time", content: moment(this.$page.post.date).format('YYYY-MM-DD') },
+                { property: "og:image", content: this.ogImageUrl },
+
+                { name: "twitter:card", content: "summary_large_image" },
+                { name: "twitter:title", content: this.$page.post.title },
+                { name: "twitter:description", content: this.description(this.$page.post) },
+                { name: "twitter:site", content: "@egocentryk" },
+                { name: "twitter:creator", content: "@egocentryk" },
+                { name: "twitter:image", content: this.ogImageUrl },
+            ],
+
+            script: [
+                {
+                    innerHTML: JSON.stringify({
+                        "@context": "http://schema.org/",
+                        "@type": "Review",
+                        "itemReviewed": {
+                            "@type": "Game",
+                            "name": this.$page.post.title
+                        },
+                        "author": {
+                            "@type": "Person",
+                            "name": this.$page.post.author.id
+                        },
+                        "reviewRating": {
+                            "@type": "Rating",
+                            "ratingValue": this.$page.post.rating,
+                            "bestRating": "10",
+                            "worstRating": "1"
+                        },
+                        "reviewBody": this.description(this.$page.post),
+                        "publisher": {
+                            "@type": "Organization",
+                            "name": "Recenzje Gier",
+                            "sameAs":"https://recenzjegier.pl/",
+                            "logo": {
+                                "@type": "ImageObject",
+                                "url": "https://recenzjegier.pl/assets/static/logo.3d7a5be.dd603f0.png",
+                                "width": 120,
+                                "height": 120
+                            }
+                        },
+                        "image": {
+                            "@type": "ImageObject",
+                            "url": "https://recenzjegier.pl" + this.$page.post.cover_image.src,
+                            "width": 1024,
+                            "height": 559
+                        }
+                    }), type: 'application/ld+json'
+                }
+            ]
+        }
+    },
+
+    mounted () {
+        import('medium-zoom').then(mediumZoom => {
+            this.zoom = mediumZoom.default('.markdown p > img')
+        })
+    },
+
+    methods: {
+        imageLoadError (e) {
+            e.target.src = `/images/authors/default.png`
         },
 
-        { property: "og:type", content: 'article' },
-        { property: "og:title", content: this.$page.post.title },
-        { property: "og:description", content: this.description(this.$page.post) },
-        { property: "og:url", content: this.postUrl },
-        { property: "article:published_time", content: moment(this.$page.post.date).format('YYYY-MM-DD') },
-        { property: "og:image", content: this.ogImageUrl },
+        description(post, length, clamp) {
+            if (post.description) {
+                return post.description
+            }
 
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: this.$page.post.title },
-        { name: "twitter:description", content: this.description(this.$page.post) },
-        { name: "twitter:site", content: "@cossssmin" },
-        { name: "twitter:creator", content: "@cossssmin" },
-        { name: "twitter:image", content: this.ogImageUrl },
-      ],
-    }
-  },
-  mounted () {
-    import('medium-zoom').then(mediumZoom => {
-      this.zoom = mediumZoom.default('.markdown p > img')
-    })
-  },
-  methods: {
-    imageLoadError (e) {
-      e.target.src = `/images/authors/default.png`
-    },
-    description(post, length, clamp) {
-      if (post.description) {
-        return post.description
-      }
+            length = length || 280
+            clamp = clamp || ' ...'
+            let text = post.content.replace(/<pre(.|\n)*?<\/pre>/gm, '').replace(/<[^>]+>/gm, '')
 
-      length = length || 280
-      clamp = clamp || ' ...'
-      let text = post.content.replace(/<pre(.|\n)*?<\/pre>/gm, '').replace(/<[^>]+>/gm, '')
+            return text.length > length ? `${ text.slice(0, length)}${clamp}` : text
+        },
 
-      return text.length > length ? `${ text.slice(0, length)}${clamp}` : text
-    },
-    titleCase(str) {
-      return str.replace('-', ' ')
+        titleCase(str) {
+            return str.replace('-', ' ')
                 .split(' ')
                 .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
                 .join(' ')
+        },
     },
 
-  },
-  computed: {
-    config () {
-      return config
-    },
-    avatar () {
-      return `/images/authors/${this.$page.post.author.id}.png`
-    },
-    postIsOlderThanOneYear () {
-      let postDate = moment(this.$page.post.datetime)
-      return moment().diff(postDate, 'years') > 0 ? true : false
-    },
-    postUrl () {
-      let siteUrl = this.config.siteUrl
-      let postSlug = this.$page.post.slug
+    computed: {
+        config () {
+            return config
+        },
 
-      return postSlug ? `${siteUrl}/${postSlug}/` : `${siteUrl}/${slugify(this.$page.post.title)}/`
+        avatar () {
+            return `/images/authors/${this.$page.post.author.id}.png`
+        },
+
+        postIsOlderThanOneYear () {
+            let postDate = moment(this.$page.post.datetime)
+            return moment().diff(postDate, 'years') > 0 ? true : false
+        },
+
+        postUrl () {
+            let siteUrl = this.config.siteUrl
+            let postSlug = this.$page.post.slug
+
+            return postSlug ? `${siteUrl}/${postSlug}/` : `${siteUrl}/${slugify(this.$page.post.title)}/`
+        },
+
+        ogImageUrl () {
+            return this.$page.post.cover_image.src || `${this.config.siteUrl}/images/default.png`
+        }
     },
-    ogImageUrl () {
-      return this.$page.post.cover || `${this.config.siteUrl}/images/bleda-card.png`
-    }
-  },
 }
 </script>
 
 <page-query>
-query Post ($path: String) {
-  post (path: $path) {
-    title
-    slug
-    datetime: date (format: "YYYY-MM-DD HH:mm:ss")
-    content
-    description
-    timeToRead
-    cover_image
-    author {
-      id
-      title
-      path
+    query Post ($path: String) {
+        post (path: $path) {
+            title
+            slug
+            datetime: date (format: "YYYY-MM-DD HH:mm:ss")
+            content
+            description
+            rating
+            timeToRead
+            cover_image
+            author {
+                id
+                title
+                path
+            }
+            tags {
+                id
+                title
+                path
+            }
+        }
     }
-    tags {
-      id
-      title
-      path
-    }
-  }
-}
 </page-query>

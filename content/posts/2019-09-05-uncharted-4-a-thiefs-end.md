@@ -1,8 +1,9 @@
 ---
-title: "Uncharted 4: A Thiefs End"
-description: "Writing posts in Markdown with Bleda for Gridsome"
+title: "Uncharted 4: A Thief's End"
+description: "Recenzja gry Uncharted 4: A Thief's End (PS4) - W każdej generacji konsol debiutuje tylko kilka gier, które pozostają z nami na dłużej – w trakcie rozmów, przewijając się w postaci niezliczonych wątków na forach, będąc częścią osobistych wspomnień..."
 date: 2019-09-05 11:07:12
 author: egocentryk
+rating: 10
 slug: uncharted-4
 tags:
     - ps4
