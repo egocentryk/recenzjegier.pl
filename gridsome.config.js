@@ -5,10 +5,10 @@ class TailwindExtractor {
 }
 
 module.exports = {
-  siteName: 'A blog starter for Gridsome',
-  siteDescription: "Bleda is a blog starter kit for Gridsome, the static site generator. It's inspired by Attila for Ghost, and styled with Tailwind CSS.",
-  siteUrl: 'https://gridsome-starter-bleda.netlify.com',
-  titleTemplate: `%s | Bleda`,
+  siteName: 'Recenzje Gier',
+  siteDescription: "",
+  siteUrl: 'https://recenzjegier.pl',
+  titleTemplate: `%s | Recenzje Gier`,
   icon: 'src/favicon.png',
 
   transformers: {
@@ -61,14 +61,14 @@ module.exports = {
       options: {
         contentTypeName: 'Post',
         feedOptions: {
-          title: 'Bleda, a Gridsome blog starter',
-          feed_url: 'https://gridsome-starter-bleda.netlify.com/feed.xml',
-          site_url: 'https://gridsome-starter-bleda.netlify.com'
+          title: 'Recenzje Gier',
+          feed_url: 'https://recenzjegier.pl/feed.xml',
+          site_url: 'https://recenzjegier.pl'
         },
         feedItemOptions: node => ({
           title: node.title,
           description: node.description,
-          url: 'https://gridsome-starter-bleda.netlify.com/' + node.slug,
+          url: 'https://recenzjegier.pl/' + node.slug,
           author: node.author,
           date: node.date
         }),
