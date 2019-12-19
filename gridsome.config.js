@@ -29,16 +29,13 @@ module.exports = {
       options: {
         path: 'content/posts/**/*.md',
         typeName: 'Post',
-        route: '/:slug',
         refs: {
           tags: {
             typeName: 'Tag',
-            route: '/tag/:id',
             create: true
           },
           author: {
             typeName: 'Author',
-            route: '/author/:id',
             create: true
           }
         }
@@ -79,6 +76,12 @@ module.exports = {
       }
     },
   ],
+
+  templates: {
+    Post: '/:title',
+    Tag: '/tag/:id',
+    Author: '/author/:id',
+  },
 
   chainWebpack: config => {
     config.module
